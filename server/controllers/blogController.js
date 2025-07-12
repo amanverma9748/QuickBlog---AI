@@ -4,7 +4,7 @@ import Blog from '../models/Blog.js';
 
 export const addBlog = async (req, res) => {
     try {
-        const { title, subTitle, description, category, isPublished } = JSON.parse(req.bodyblog);
+        const { title, subTitle, description, category, isPublished } = JSON.parse(req.body.blog);
         const imageFile = req.file;
 
         // Check if all fields are present
@@ -12,9 +12,9 @@ export const addBlog = async (req, res) => {
             return res.json({ success: false, message: "Missing required fields" })
         }
 
+        const fileBuffer = fs.readFileSync(imageFile.path)
 
         // Upload Image to ImageKit
-        const fileBuffer = fs.readFileSync(imageFile.path)
         const response = await imagekit.upload({
             file: fileBuffer,
             fileName: imageFile.originalname,
@@ -23,6 +23,7 @@ export const addBlog = async (req, res) => {
 
         // optimization through imagekit URL transformation
         const optimizedImageUrl = imagekit.url({
+            path: response.filePath,
             transformation: [
                 { quality: 'auto' }, // auto compression
                 { format: 'webp' },  //Convert to modern format
